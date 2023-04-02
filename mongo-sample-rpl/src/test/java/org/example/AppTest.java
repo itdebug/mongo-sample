@@ -52,24 +52,23 @@ public class AppTest
         String decode = SymmetricUtil.decode("Mp9MNqjjPtHyz2tZnW7YHcILXJC+rcWVPDPny4dKlKnQryxx51m0b/nW/os65Df6zMb0KsYuGBgFHBm546Elr+fXICnH4rt+tZy1eSwEVliSTH5zKKJNh7jmPjr//RqzJOr0B2a3TFg4ON1hro/jLA==");
         final MongoClientURI uri = new MongoClientURI(decode +
                         "&readPreference=secondaryPreferred" +
-                        "&connectTimeoutMS=300000" +
                         "&minpoolsize=1" +
                         "&waitqueuemultiple=1" +
-                        "&waitqueuetimeoutms=1" +
-                        "&connecttimeoutms=1" +
+                        "&waitqueuetimeoutms=10000" +
+                        "&connecttimeoutms=10000" +
+                        "&maxlifetimems=200000" +
                         "&maxpoolsize=1");
 
         ExecutorService executorService = Executors.newFixedThreadPool(100);
+        final MongoClient newClient = new MongoClient(uri);
         for (int i = 0; i < 100; i++) {
             executorService.execute(new Runnable() {
                 public void run() {
-                    final MongoClient newClient = new MongoClient(uri);
                     MongoDatabase database = newClient.getDatabase("crm");
                     MongoCollection<Document> collection = database.getCollection("counter");
                     // Perform some operations using the connection pool
                     for (int i = 0; i < 2000000; i++) {
-                        FindIterable<Document> documents = collection.find();
-//                        System.out.println(documents);
+                        System.out.println(collection.count());
                     }
                     newClient.close();
                 }
